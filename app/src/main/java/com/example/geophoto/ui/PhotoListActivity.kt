@@ -20,13 +20,17 @@ import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Color
+import com.example.geophoto.ui.theme.GeoPhotoTheme
+
 class PhotoListActivity : ComponentActivity() {
     private val photoViewModel: PhotoViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            PhotoListScreen(photoViewModel)
+            GeoPhotoTheme {
+                PhotoListScreen(photoViewModel)
+            }
         }
     }
 }

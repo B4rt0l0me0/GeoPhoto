@@ -46,13 +46,17 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import androidx.compose.ui.graphics.Color
+import com.example.geophoto.ui.theme.GeoPhotoTheme
+
 class MainActivity : ComponentActivity() {
     private val photoViewModel: PhotoViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            GeoPhotoApp(photoViewModel)
+            GeoPhotoTheme {
+                GeoPhotoApp(photoViewModel)
+            }
         }
     }
 }
@@ -238,7 +242,7 @@ suspend fun odczytajExif(
                         cityName = cityName
                     )
                 )
-                return "GPS: $lat, $lon\nMiasto: ${cityName ?: "Nieznane"}"
+                return "GPS: $lat, $lon\nMiasto: ${cityName ?: "Nieznane "}"
             } else {
                 // suspendujemy i czekamy na lastLocation
                 val loc: Location? = try {
