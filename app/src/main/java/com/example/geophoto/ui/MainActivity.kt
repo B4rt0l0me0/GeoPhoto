@@ -39,7 +39,12 @@ import androidx.annotation.RequiresPermission
 import com.example.geophoto.ui.PhotoViewModel
 import com.example.geophoto.R
 import com.example.geophoto.data.PhotoEntity
-
+import android.location.Geocoder
+import java.util.Locale
+import android.location.Location
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 class MainActivity : ComponentActivity() {
     private val photoViewModel: PhotoViewModel by viewModels()
 
@@ -198,7 +203,7 @@ suspend fun odczytajExif(
     fusedLocationClient: FusedLocationProviderClient,
     viewModel: PhotoViewModel
 ): String {
-    return try {
+    try {
         val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
         if (inputStream != null) {
             val exif = ExifInterface(inputStream)
@@ -206,33 +211,67 @@ suspend fun odczytajExif(
             val hasLatLong = exif.getLatLong(latLong)
             inputStream.close()
 
+            // Pomocnicza funkcja do geokodowania współrzędnych na nazwę miasta (lub null)
+            fun geocodeCity(lat: Double, lon: Double): String? {
+                return try {
+                    val geocoder = Geocoder(context, Locale.getDefault())
+                    val addresses = geocoder.getFromLocation(lat, lon, 1)
+                    val addr = addresses?.firstOrNull()
+                    // próbujemy kilka pól, aby uzyskać sensowną nazwę
+                    addr?.locality ?: addr?.subAdminArea ?: addr?.adminArea
+                } catch (e: Exception) {
+                    null
+                }
+            }
+
             if (hasLatLong) {
                 val lat = latLong[0].toDouble()
                 val lon = latLong[1].toDouble()
+                val cityName = geocodeCity(lat, lon)
+
                 viewModel.insertPhoto(
                     PhotoEntity(
                         filePath = uri.toString(),
                         latitude = lat,
-                        longitude = lon
+                        longitude = lon,
+                        cityName = cityName
                     )
                 )
-                "GPS: $lat, $lon"
+                return "GPS: $lat, $lon\nMiasto: ${cityName ?: "Nieznane"}"
             } else {
-                fusedLocationClient.lastLocation.addOnSuccessListener { loc ->
-                    if (loc != null) {
-                        viewModel.insertPhoto(
-                            PhotoEntity(
-                                filePath = uri.toString(),
-                                latitude = loc.latitude,
-                                longitude = loc.longitude
-                            )
-                        )
+                // suspendujemy i czekamy na lastLocation
+                val loc: Location? = try {
+                    suspendCancellableCoroutine { cont ->
+                        fusedLocationClient.lastLocation
+                            .addOnSuccessListener { location -> cont.resume(location) }
+                            .addOnFailureListener { e -> cont.resumeWithException(e) }
                     }
+                } catch (e: Exception) {
+                    null
                 }
-                "Brak GPS — lokalizacja zostanie dodana"
+
+                if (loc != null) {
+                    val lat = loc.latitude
+                    val lon = loc.longitude
+                    val cityName = geocodeCity(lat, lon)
+
+                    viewModel.insertPhoto(
+                        PhotoEntity(
+                            filePath = uri.toString(),
+                            latitude = lat,
+                            longitude = lon,
+                            cityName = cityName
+                        )
+                    )
+                    return "GPS: $lat, $lon\nMiasto: ${cityName ?: "Nieznane"}"
+                } else {
+                    return "Brak GPS — lokalizacja zostanie dodana"
+                }
             }
-        } else "Błąd otwarcia zdjęcia"
+        } else {
+            return "Błąd otwarcia zdjęcia"
+        }
     } catch (e: Exception) {
-        "Błąd EXIF: ${e.message}"
+        return "Błąd EXIF: ${e.message}"
     }
 }

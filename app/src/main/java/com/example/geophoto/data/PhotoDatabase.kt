@@ -4,10 +4,8 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.example.geophoto.data.PhotoDao
-import com.example.geophoto.data.PhotoEntity
 
-@Database(entities = [PhotoEntity::class], version = 1)
+@Database(entities = [PhotoEntity::class], version = 2) // ← zwiększona wersja
 abstract class PhotoDatabase : RoomDatabase() {
     abstract fun photoDao(): PhotoDao
 
@@ -21,7 +19,10 @@ abstract class PhotoDatabase : RoomDatabase() {
                     context.applicationContext,
                     PhotoDatabase::class.java,
                     "photo_database"
-                ).build()
+                )
+                    // usuwa starą bazę przy zmianie schematu, jeśli brak migracji
+                    .fallbackToDestructiveMigration()
+                    .build()
                 INSTANCE = instance
                 instance
             }

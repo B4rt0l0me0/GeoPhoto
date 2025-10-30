@@ -57,7 +57,7 @@ fun PhotoListScreen(photoViewModel: PhotoViewModel) {
                             modifier = Modifier.size(100.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Lat: ${photo.latitude}, Lon: ${photo.longitude}")
+                        Text("Lat: ${photo.latitude}, Lon: ${photo.longitude}\nMiasto: ${photo.cityName ?: "Nieznane"}")
                     }
                 }
             }

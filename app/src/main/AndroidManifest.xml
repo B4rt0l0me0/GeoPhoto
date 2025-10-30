@@ -21,7 +21,7 @@
         <!-- Klucz API do Google Maps -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="" />
+            android:value="AIzaSyD6LqYo2m2ipMwSE2ul95IoK1MLGhFR-UM" />
         <activity android:name=".ui.PhotoListActivity" />
 
         <!-- Aktywność główna -->

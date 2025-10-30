@@ -9,5 +9,6 @@ data class PhotoEntity(
     val filePath: String,
     val latitude: Double,
     val longitude: Double,
+    val cityName: String? = null,
     val timestamp: Long = System.currentTimeMillis()
 )
