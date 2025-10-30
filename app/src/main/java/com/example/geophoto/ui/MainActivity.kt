@@ -135,7 +135,7 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
                     val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
                     galleryLauncher.launch(intent)
                 }) {
-                    Text("Galeria", color = Color.Black)
+                    Text("Galeria", color = Color.White)
                 }
 
                 Button(onClick = {
@@ -163,7 +163,7 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
                     tempCameraUri = uri
                     cameraLauncher.launch(uri)
                 }) {
-                    Text("Aparat", color = Color.Black)
+                    Text("Aparat", color = Color.White)
                 }
             }
 
@@ -174,7 +174,7 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
                     context.startActivity(Intent(context, MapActivity::class.java))
                 },
                 modifier = Modifier.fillMaxWidth(0.9f)
-            ) { Text("Mapa wszystkich zdjęć", color = Color.Black) }
+            ) { Text("Mapa wszystkich zdjęć", color = Color.White) }
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -183,7 +183,7 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
                     context.startActivity(Intent(context, PhotoListActivity::class.java))
                 },
                 modifier = Modifier.fillMaxWidth(0.9f)
-            ) { Text("Zdjęcia (lista)", color = Color.Black) }
+            ) { Text("Zdjęcia (lista)", color = Color.White) }
         }
     }
 }
