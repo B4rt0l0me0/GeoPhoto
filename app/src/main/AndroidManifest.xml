@@ -17,11 +17,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.GeoPhoto">
-
+        <activity android:name=".ui.PhotoDetailActivity" />
         <!-- Klucz API do Google Maps -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="AIzaSyD6LqYo2m2ipMwSE2ul95IoK1MLGhFR-UM" />
+            android:value="" />
         <activity android:name=".ui.PhotoListActivity" />
 
         <!-- Aktywność główna -->

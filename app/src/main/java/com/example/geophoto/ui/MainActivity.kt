@@ -45,6 +45,7 @@ import android.location.Location
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
+import androidx.compose.ui.graphics.Color
 class MainActivity : ComponentActivity() {
     private val photoViewModel: PhotoViewModel by viewModels()
 
@@ -106,7 +107,7 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
 
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("GeoPhoto") }) }
+        topBar = { TopAppBar(title = { Text("GeoPhoto", color = Color.Black) }) }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -126,7 +127,7 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
             )
 
             Spacer(modifier = Modifier.height(12.dp))
-            Text(exifText)
+            Text(exifText, color = Color.Black)
             Spacer(modifier = Modifier.height(20.dp))
 
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -134,7 +135,7 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
                     val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
                     galleryLauncher.launch(intent)
                 }) {
-                    Text("Galeria")
+                    Text("Galeria", color = Color.Black)
                 }
 
                 Button(onClick = {
@@ -162,7 +163,7 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
                     tempCameraUri = uri
                     cameraLauncher.launch(uri)
                 }) {
-                    Text("Aparat")
+                    Text("Aparat", color = Color.Black)
                 }
             }
 
@@ -173,7 +174,7 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
                     context.startActivity(Intent(context, MapActivity::class.java))
                 },
                 modifier = Modifier.fillMaxWidth(0.9f)
-            ) { Text("Mapa wszystkich zdjęć") }
+            ) { Text("Mapa wszystkich zdjęć", color = Color.Black) }
 
             Spacer(modifier = Modifier.height(8.dp))
 
@@ -182,7 +183,7 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
                     context.startActivity(Intent(context, PhotoListActivity::class.java))
                 },
                 modifier = Modifier.fillMaxWidth(0.9f)
-            ) { Text("Zdjęcia (lista)") }
+            ) { Text("Zdjęcia (lista)", color = Color.Black) }
         }
     }
 }

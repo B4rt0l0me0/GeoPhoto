@@ -20,7 +20,6 @@ abstract class PhotoDatabase : RoomDatabase() {
                     PhotoDatabase::class.java,
                     "photo_database"
                 )
-                    // usuwa starą bazę przy zmianie schematu, jeśli brak migracji
                     .fallbackToDestructiveMigration()
                     .build()
                 INSTANCE = instance

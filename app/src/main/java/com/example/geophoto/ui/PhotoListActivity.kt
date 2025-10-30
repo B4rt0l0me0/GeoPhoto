@@ -16,7 +16,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.example.geophoto.ui.PhotoViewModel
-
+import android.content.Intent
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.graphics.Color
 class PhotoListActivity : ComponentActivity() {
     private val photoViewModel: PhotoViewModel by viewModels()
 
@@ -32,9 +35,10 @@ class PhotoListActivity : ComponentActivity() {
 @Composable
 fun PhotoListScreen(photoViewModel: PhotoViewModel) {
     val photos by photoViewModel.allPhotos.observeAsState(emptyList())
+    val context = LocalContext.current // <--- pobieramy kontekst tutaj!
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Lista zdjęć") }) }
+        topBar = { TopAppBar(title = { Text("Lista zdjęć", color = Color.Black) }) }
     ) { padding ->
         LazyColumn(
             modifier = Modifier
@@ -46,7 +50,16 @@ fun PhotoListScreen(photoViewModel: PhotoViewModel) {
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 6.dp),
+                        .padding(vertical = 6.dp)
+                        .clickable {
+                            val intent = Intent(context, PhotoDetailActivity::class.java).apply {
+                                putExtra("filePath", photo.filePath)
+                                putExtra("latitude", photo.latitude)
+                                putExtra("longitude", photo.longitude)
+                                putExtra("cityName", photo.cityName)
+                            }
+                            context.startActivity(intent)
+                        },
                     elevation = CardDefaults.cardElevation(4.dp)
                 ) {
                     Row(modifier = Modifier.padding(8.dp)) {
@@ -57,7 +70,9 @@ fun PhotoListScreen(photoViewModel: PhotoViewModel) {
                             modifier = Modifier.size(100.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Lat: ${photo.latitude}, Lon: ${photo.longitude}\nMiasto: ${photo.cityName ?: "Nieznane"}")
+                        Text(
+                            "Lat: ${photo.latitude}, Lon: ${photo.longitude}\nMiasto: ${photo.cityName ?: "Nieznane"}", color = Color.Black
+                        )
                     }
                 }
             }
