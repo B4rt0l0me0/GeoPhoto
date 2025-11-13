@@ -90,7 +90,9 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
             result.data?.data?.let { uri ->
                 currentPhoto = uri
                 coroutineScope.launch {
-                    exifText = odczytajExif(uri, context, fusedLocationClient, photoViewModel)
+                    val localPath = zapiszKopieZdjecia(context, uri)
+                    val localUri = Uri.fromFile(File(localPath))
+                    exifText = odczytajExif(localUri, context, fusedLocationClient, photoViewModel)
                 }
             }
         }
@@ -279,4 +281,17 @@ suspend fun odczytajExif(
     } catch (e: Exception) {
         return "Błąd EXIF: ${e.message}"
     }
+}
+
+fun zapiszKopieZdjecia(context: Context, uri: Uri): String {
+    val inputStream = context.contentResolver.openInputStream(uri) ?: return ""
+    val dir = context.getExternalFilesDir("images")
+    if (dir != null && !dir.exists()) dir.mkdirs()
+    val file = File(dir, "photo_${System.currentTimeMillis()}.jpg")
+    inputStream.use { input ->
+        file.outputStream().use { output ->
+            input.copyTo(output)
+        }
+    }
+    return file.absolutePath
 }
