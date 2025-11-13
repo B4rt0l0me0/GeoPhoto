@@ -46,6 +46,7 @@ import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import com.example.geophoto.ui.theme.GeoPhotoTheme
 
 class MainActivity : ComponentActivity() {
@@ -133,7 +134,12 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
             )
 
             Spacer(modifier = Modifier.height(12.dp))
-            Text(exifText, color = Color.Black)
+            Text(
+                text = exifText,
+                color = Color.Black,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
             Spacer(modifier = Modifier.height(20.dp))
 
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {

@@ -24,7 +24,15 @@ class PhotoDetailActivity : ComponentActivity() {
 
         setContent {
             Scaffold(
-                topBar = { TopAppBar(title = { Text("Podgląd zdjęcia", color = Color.Black) }) }
+                topBar = {
+                    TopAppBar(
+                        title = { Text("Podgląd zdjęcia") },
+                        colors = TopAppBarDefaults.topAppBarColors(
+                            containerColor = Color.White,
+                            titleContentColor = Color.Black
+                        )
+                    )
+                }
             ) { padding ->
                 Column(
                     modifier = Modifier

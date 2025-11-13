@@ -42,7 +42,15 @@ fun PhotoListScreen(photoViewModel: PhotoViewModel) {
     val context = LocalContext.current // <--- pobieramy kontekst tutaj!
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("Lista zdjęć", color = Color.Black) }) }
+        topBar = {
+            TopAppBar(
+                title = { Text("Lista zdjęć") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.White,
+                    titleContentColor = Color.Black
+                )
+            )
+        }
     ) { padding ->
         LazyColumn(
             modifier = Modifier
