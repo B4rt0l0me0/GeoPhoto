@@ -1,4 +1,4 @@
-package com.example.geophoto.ui.theme
+package com.example.geophoto.ui
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable

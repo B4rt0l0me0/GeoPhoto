@@ -36,7 +36,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 import androidx.activity.compose.setContent
 import androidx.annotation.RequiresPermission
-import com.example.geophoto.ui.PhotoViewModel
 import com.example.geophoto.R
 import com.example.geophoto.data.PhotoEntity
 import android.location.Geocoder
@@ -47,7 +46,6 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
-import com.example.geophoto.ui.theme.GeoPhotoTheme
 
 class MainActivity : ComponentActivity() {
     private val photoViewModel: PhotoViewModel by viewModels()
@@ -70,7 +68,7 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
     val coroutineScope = rememberCoroutineScope()
     var tempCameraUri by remember { mutableStateOf<Uri?>(null) }
     var currentPhoto by remember { mutableStateOf<Uri?>(null) }
-    var exifText by remember { mutableStateOf("Brak danych EXIF") }
+    var exifText by remember { mutableStateOf("") }
 
     // --- launchery ---
     val permissionLauncher = rememberLauncherForActivityResult(
