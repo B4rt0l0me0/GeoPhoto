@@ -8,14 +8,14 @@ import com.example.geophoto.data.PhotoDatabase
 import com.example.geophoto.data.PhotoEntity
 import kotlinx.coroutines.launch
 
-class PhotoViewModel(application: Application) : AndroidViewModel(application) {
+class PhotoViewModel(application: Application) : AndroidViewModel(application) { // Tworzenie klasy
 
-    private val photoDao = PhotoDatabase.Companion.getDatabase(application).photoDao()
-    val allPhotos: LiveData<List<PhotoEntity>> = photoDao.getAllPhotos()
+    private val photoDao = PhotoDatabase.Companion.getDatabase(application).photoDao() // Umożliwienie komunikacji z bazą danych
+    val allPhotos: LiveData<List<PhotoEntity>> = photoDao.getAllPhotos() // Lista zdjęć
 
-    fun insertPhoto(photo: PhotoEntity) {
-        viewModelScope.launch {
-            photoDao.insert(photo)
+    fun insertPhoto(photo: PhotoEntity) { // Funkcja operująca na bazie
+        viewModelScope.launch { // Uruchomienie funkcji w tle
+            photoDao.insert(photo) // Wstawienie zdjęcia do bazy
         }
     }
 }

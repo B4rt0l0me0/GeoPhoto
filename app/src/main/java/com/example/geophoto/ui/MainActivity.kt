@@ -46,6 +46,10 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.core.net.toUri
 
 class MainActivity : ComponentActivity() {
     private val photoViewModel: PhotoViewModel by viewModels()
@@ -63,21 +67,23 @@ class MainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
+
     val context = LocalContext.current
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
     val coroutineScope = rememberCoroutineScope()
-    var tempCameraUri by remember { mutableStateOf<Uri?>(null) }
-    var currentPhoto by remember { mutableStateOf<Uri?>(null) }
-    var exifText by remember { mutableStateOf("") }
 
-    // --- launchery ---
+    var tempCameraUriString by rememberSaveable { mutableStateOf<String?>(null) }
+    var currentPhotoString by rememberSaveable { mutableStateOf<String?>(null) }
+    var exifText by rememberSaveable { mutableStateOf("") }
+
+    val tempCameraUri = tempCameraUriString?.toUri()
+    val currentPhoto = currentPhotoString?.toUri()
+
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         val granted = permissions.all { it.value }
-        if (granted) {
-            Toast.makeText(context, "Uprawnienia przyznane", Toast.LENGTH_SHORT).show()
-        } else {
+        if (!granted) {
             Toast.makeText(context, "Brak wymaganych uprawnień", Toast.LENGTH_SHORT).show()
         }
     }
@@ -87,7 +93,7 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
             result.data?.data?.let { uri ->
-                currentPhoto = uri
+                currentPhotoString = uri.toString()
                 coroutineScope.launch {
                     val localPath = zapiszKopieZdjecia(context, uri)
                     val localUri = Uri.fromFile(File(localPath))
@@ -101,25 +107,23 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
         if (success && tempCameraUri != null) {
-            currentPhoto = tempCameraUri
+            currentPhotoString = tempCameraUri.toString()
             coroutineScope.launch {
-                exifText = odczytajExif(tempCameraUri!!, context, fusedLocationClient, photoViewModel)
+                exifText = odczytajExif(tempCameraUri, context, fusedLocationClient, photoViewModel)
             }
-        } else {
-            Toast.makeText(context, "Nie zrobiono zdjęcia", Toast.LENGTH_SHORT).show()
         }
     }
 
-
-    Scaffold(
-    ) { padding ->
+    Scaffold { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(padding)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+
             Image(
                 painter = currentPhoto?.let { rememberAsyncImagePainter(it) }
                     ?: painterResource(R.drawable.ic_launcher_foreground),
@@ -131,47 +135,55 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
             )
 
             Spacer(modifier = Modifier.height(12.dp))
+
             Text(
                 text = exifText,
                 color = Color.Black,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
+
             Spacer(modifier = Modifier.height(20.dp))
 
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Button(onClick = {
-                    val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-                    galleryLauncher.launch(intent)
-                }) {
+                Button(
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
+                        galleryLauncher.launch(intent)
+                    }
+                ) {
                     Text("Galeria", color = Color.White)
                 }
 
-                Button(onClick = {
-                    val hasPermissions = listOf(
-                        Manifest.permission.CAMERA,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                    ).all {
-                        ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
-                    }
+                Button(
+                    onClick = {
+                        val hasPermissions = listOf(
+                            Manifest.permission.CAMERA,
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                        ).all {
+                            ContextCompat.checkSelfPermission(context, it) == PackageManager.PERMISSION_GRANTED
+                        }
 
-                    if (!hasPermissions) {
-                        permissionLauncher.launch(
-                            arrayOf(
-                                Manifest.permission.CAMERA,
-                                Manifest.permission.ACCESS_FINE_LOCATION
+                        if (!hasPermissions) {
+                            permissionLauncher.launch(
+                                arrayOf(
+                                    Manifest.permission.CAMERA,
+                                    Manifest.permission.ACCESS_FINE_LOCATION
+                                )
                             )
-                        )
-                        return@Button
-                    }
+                            return@Button
+                        }
 
-                    val photoFile = utworzPlik(context)
-                    val uri = FileProvider.getUriForFile(
-                        context, "${context.packageName}.fileprovider", photoFile
-                    )
-                    tempCameraUri = uri
-                    cameraLauncher.launch(uri)
-                }) {
+                        val photoFile = utworzPlik(context)
+                        val uri = FileProvider.getUriForFile(
+                            context, "${context.packageName}.fileprovider", photoFile
+                        )
+
+                        tempCameraUriString = uri.toString()
+                        cameraLauncher.launch(uri)
+
+                    }
+                ) {
                     Text("Aparat", color = Color.White)
                 }
             }
@@ -179,31 +191,18 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
             Spacer(modifier = Modifier.height(28.dp))
 
             Button(
-                onClick = {
-                    context.startActivity(Intent(context, MapActivity::class.java))
-                },
+                onClick = { context.startActivity(Intent(context, MapActivity::class.java)) },
                 modifier = Modifier.fillMaxWidth(0.9f)
             ) { Text("Mapa wszystkich zdjęć", color = Color.White) }
 
             Spacer(modifier = Modifier.height(8.dp))
 
             Button(
-                onClick = {
-                    context.startActivity(Intent(context, PhotoListActivity::class.java))
-                },
+                onClick = { context.startActivity(Intent(context, PhotoListActivity::class.java)) },
                 modifier = Modifier.fillMaxWidth(0.9f)
             ) { Text("Zdjęcia (lista)", color = Color.White) }
         }
     }
-}
-
-
-// --- Pomocnicze funkcje ---
-
-fun utworzPlik(context: Context): File {
-    val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-    val storageDir = context.getExternalFilesDir(null)
-    return File.createTempFile("GeoPhoto_${timeStamp}_", ".jpg", storageDir)
 }
 
 @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
@@ -247,7 +246,6 @@ suspend fun odczytajExif(
                 )
                 return "GPS: $lat, $lon\nMiasto: ${cityName ?: "Nieznane "}"
             } else {
-                // suspendujemy i czekamy na lastLocation
                 val loc: Location? = try {
                     suspendCancellableCoroutine { cont ->
                         fusedLocationClient.lastLocation
@@ -284,6 +282,11 @@ suspend fun odczytajExif(
     }
 }
 
+fun utworzPlik(context: Context): File {
+    val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
+    val storageDir = context.getExternalFilesDir(null)
+    return File.createTempFile("GeoPhoto_${timeStamp}_", ".jpg", storageDir)
+}
 fun zapiszKopieZdjecia(context: Context, uri: Uri): String {
     val inputStream = context.contentResolver.openInputStream(uri) ?: return ""
     val dir = context.getExternalFilesDir("images")
