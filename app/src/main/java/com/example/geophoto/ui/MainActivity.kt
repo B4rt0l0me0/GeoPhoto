@@ -112,7 +112,6 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
 
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text("GeoPhoto", color = Color.Black) }) }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -222,13 +221,11 @@ suspend fun odczytajExif(
             val hasLatLong = exif.getLatLong(latLong)
             inputStream.close()
 
-            // Pomocnicza funkcja do geokodowania współrzędnych na nazwę miasta (lub null)
             fun geocodeCity(lat: Double, lon: Double): String? {
                 return try {
                     val geocoder = Geocoder(context, Locale.getDefault())
                     val addresses = geocoder.getFromLocation(lat, lon, 1)
                     val addr = addresses?.firstOrNull()
-                    // próbujemy kilka pól, aby uzyskać sensowną nazwę
                     addr?.locality ?: addr?.subAdminArea ?: addr?.adminArea
                 } catch (e: Exception) {
                     null
