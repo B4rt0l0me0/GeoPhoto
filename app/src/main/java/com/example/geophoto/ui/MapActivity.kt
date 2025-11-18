@@ -1,3 +1,4 @@
+// Wyświetlanie map Googla
 package com.example.geophoto.ui
 
 import android.os.Bundle
@@ -12,9 +13,9 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.*
 
 class MapActivity : ComponentActivity() {
-    private val photoViewModel: PhotoViewModel by viewModels()
+    private val photoViewModel: PhotoViewModel by viewModels() // Pobranie listy zdjęc z bazy danych
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) { // Ustawienie motywu
         super.onCreate(savedInstanceState)
         setContent {
             GeoPhotoTheme {
@@ -26,8 +27,8 @@ class MapActivity : ComponentActivity() {
 
 @Composable
 fun MapScreen(photoViewModel: PhotoViewModel) {
-    val photos by photoViewModel.allPhotos.observeAsState(emptyList())
-    val cameraPositionState = rememberCameraPositionState()
+    val photos by photoViewModel.allPhotos.observeAsState(emptyList()) // Automatyczne odświeżanie mapy po dodaniu zdjęcia
+    val cameraPositionState = rememberCameraPositionState() // Informacje o mapach
 
     GoogleMap(
         modifier = Modifier,
@@ -37,12 +38,12 @@ fun MapScreen(photoViewModel: PhotoViewModel) {
             Marker(
                 state = MarkerState(LatLng(photo.latitude, photo.longitude)),
                 title = "Zdjęcie",
-                snippet = "Lat: ${photo.latitude}, Lon: ${photo.longitude}"
+                snippet = "Lat: ${photo.latitude}, Lon: ${photo.longitude}" // Informacje o współrzędnych
             )
         }
     }
 
-    LaunchedEffect(photos) {
+    LaunchedEffect(photos) { // Ustawienie kamery na nowym zdjęciu
         photos.firstOrNull()?.let {
             cameraPositionState.position = CameraPosition.fromLatLngZoom(
                 LatLng(it.latitude, it.longitude),

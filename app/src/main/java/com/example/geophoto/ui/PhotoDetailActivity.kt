@@ -1,3 +1,4 @@
+// Zdjęcie po kliknięciu
 package com.example.geophoto.ui
 
 import android.os.Bundle
@@ -17,13 +18,13 @@ class PhotoDetailActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val filePath = intent.getStringExtra("filePath")
-        val latitude = intent.getDoubleExtra("latitude", 0.0)
-        val longitude = intent.getDoubleExtra("longitude", 0.0)
-        val cityName = intent.getStringExtra("cityName") ?: "Nieznane"
+        val filePath = intent.getStringExtra("filePath") // Pobranie danych z listy
+        val latitude = intent.getDoubleExtra("latitude", 0.0) // Pobranie danych z listy
+        val longitude = intent.getDoubleExtra("longitude", 0.0) // Pobranie danych z listy
+        val cityName = intent.getStringExtra("cityName") ?: "Nieznane" // Pobranie danych z listy
 
         setContent {
-            Scaffold(
+            Scaffold( // Napis u góry
                 topBar = {
                     TopAppBar(
                         title = { Text("Podgląd zdjęcia") },
@@ -34,16 +35,16 @@ class PhotoDetailActivity : ComponentActivity() {
                     )
                 }
             ) { padding ->
-                Column(
+                Column( // Układ pionowy dla zdjęcia
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(padding)
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    if (filePath != null) {
+                    if (filePath != null) { // Wyswietlanie zdjęcia
                         Image(
-                            painter = rememberAsyncImagePainter(filePath),
+                            painter = rememberAsyncImagePainter(filePath), // Pobranie zdjęcia ze ścieżki
                             contentDescription = null,
                             contentScale = ContentScale.Fit,
                             modifier = Modifier
@@ -53,8 +54,8 @@ class PhotoDetailActivity : ComponentActivity() {
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Lat: $latitude, Lon: $longitude", color = Color.Black)
-                    Text("Miasto: $cityName", color = Color.Black)
+                    Text("Lat: $latitude, Lon: $longitude", color = Color.Black) // Informacje o współrzędnych
+                    Text("Miasto: $cityName", color = Color.Black) // Informacje o zdjęciu
                 }
             }
         }

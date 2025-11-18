@@ -1,3 +1,4 @@
+// Lista wyświetlająca zdjęcia
 package com.example.geophoto.ui
 
 import android.os.Bundle
@@ -36,11 +37,11 @@ class PhotoListActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PhotoListScreen(photoViewModel: PhotoViewModel) {
-    val photos by photoViewModel.allPhotos.observeAsState(emptyList())
-    val context = LocalContext.current // <--- pobieramy kontekst tutaj!
+    val photos by photoViewModel.allPhotos.observeAsState(emptyList()) // Automatyczne odświeżanie listy po pojawieniu się nowego zdjęcia
+    val context = LocalContext.current // Pobranie kontekstu
 
     Scaffold(
-        topBar = {
+        topBar = { // Pasek górny
             TopAppBar(
                 title = { Text("Lista zdjęć") },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -50,14 +51,14 @@ fun PhotoListScreen(photoViewModel: PhotoViewModel) {
             )
         }
     ) { padding ->
-        LazyColumn(
+        LazyColumn( // Lista zdjęć
             modifier = Modifier
                 .padding(padding)
                 .fillMaxSize(),
             contentPadding = PaddingValues(12.dp)
         ) {
             items(photos) { photo ->
-                Card(
+                Card( //
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 6.dp)
