@@ -35,7 +35,7 @@ fun MapScreen(photoViewModel: PhotoViewModel) {
         cameraPositionState = cameraPositionState
     ) {
         photos.forEach { photo ->
-            Marker(
+            Marker( // Tytuł i współrzędne dla pinezki na mapie
                 state = MarkerState(LatLng(photo.latitude, photo.longitude)),
                 title = "Zdjęcie",
                 snippet = "Lat: ${photo.latitude}, Lon: ${photo.longitude}" // Informacje o współrzędnych

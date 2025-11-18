@@ -54,7 +54,7 @@ import androidx.core.net.toUri
 class MainActivity : ComponentActivity() {
     private val photoViewModel: PhotoViewModel by viewModels()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    override fun onCreate(savedInstanceState: Bundle?) { // Ustawienie motywu dla aplikacji
         super.onCreate(savedInstanceState)
         setContent {
             GeoPhotoTheme {
@@ -79,7 +79,7 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
     val tempCameraUri = tempCameraUriString?.toUri()
     val currentPhoto = currentPhotoString?.toUri()
 
-    val permissionLauncher = rememberLauncherForActivityResult(
+    val permissionLauncher = rememberLauncherForActivityResult( // Uprawnienia
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         val granted = permissions.all { it.value }
@@ -88,7 +88,7 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
         }
     }
 
-    val galleryLauncher = rememberLauncherForActivityResult(
+    val galleryLauncher = rememberLauncherForActivityResult( // Galeria
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -103,7 +103,7 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
         }
     }
 
-    val cameraLauncher = rememberLauncherForActivityResult(
+    val cameraLauncher = rememberLauncherForActivityResult( // Aparat
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
         if (success && tempCameraUri != null) {
@@ -124,7 +124,7 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
-            Image(
+            Image( // Zdjęcie na głownym ekranie
                 painter = currentPhoto?.let { rememberAsyncImagePainter(it) }
                     ?: painterResource(R.drawable.ic_launcher_foreground),
                 contentDescription = null,
@@ -136,7 +136,7 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            Text(
+            Text( // Tekst pod zdjęciem na głownym ekranie
                 text = exifText,
                 color = Color.Black,
                 textAlign = TextAlign.Center,
@@ -146,7 +146,7 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
             Spacer(modifier = Modifier.height(20.dp))
 
             Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                Button(
+                Button( // Przycisk do uruchomienia galerii
                     onClick = {
                         val intent = Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
                         galleryLauncher.launch(intent)
@@ -155,7 +155,7 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
                     Text("Galeria", color = Color.White)
                 }
 
-                Button(
+                Button( // Przycisk do uruchomienia aparatu
                     onClick = {
                         val hasPermissions = listOf(
                             Manifest.permission.CAMERA,
@@ -190,14 +190,14 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
 
             Spacer(modifier = Modifier.height(28.dp))
 
-            Button(
+            Button( // Przycisk do mapy zdjęć
                 onClick = { context.startActivity(Intent(context, MapActivity::class.java)) },
                 modifier = Modifier.fillMaxWidth(0.9f)
             ) { Text("Mapa wszystkich zdjęć", color = Color.White) }
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Button(
+            Button( // Przycisk do listy zdjęć
                 onClick = { context.startActivity(Intent(context, PhotoListActivity::class.java)) },
                 modifier = Modifier.fillMaxWidth(0.9f)
             ) { Text("Zdjęcia (lista)", color = Color.White) }
