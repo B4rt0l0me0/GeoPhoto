@@ -1,3 +1,6 @@
+// Główna aplikacja
+@file:Suppress("DEPRECATION")
+
 package com.example.geophoto.ui
 
 import android.Manifest
@@ -52,7 +55,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.core.net.toUri
 
 class MainActivity : ComponentActivity() {
-    private val photoViewModel: PhotoViewModel by viewModels()
+    private val photoViewModel: PhotoViewModel by viewModels() // Zapis zdjec w bazie
 
     override fun onCreate(savedInstanceState: Bundle?) { // Ustawienie motywu dla aplikacji
         super.onCreate(savedInstanceState)
@@ -68,27 +71,29 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
 
-    val context = LocalContext.current
-    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
-    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current // Dostęp aplikacji do systemy Android
+    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) } // Pobranie lokalizacji
+    val coroutineScope = rememberCoroutineScope() // Uruchomienie w tle funkcji
 
-    var tempCameraUriString by rememberSaveable { mutableStateOf<String?>(null) }
-    var currentPhotoString by rememberSaveable { mutableStateOf<String?>(null) }
-    var exifText by rememberSaveable { mutableStateOf("") }
+    var tempCameraUriString by rememberSaveable { mutableStateOf<String?>(null) } // Adres URI przed zrobieniem zdjecia
+    var currentPhotoString by rememberSaveable { mutableStateOf<String?>(null) } // Adres URI po wybraniu/zrobieniu zdjecia
+    var exifText by rememberSaveable { mutableStateOf("") } // Tekst pod zdjeciem
 
-    val tempCameraUri = tempCameraUriString?.toUri()
-    val currentPhoto = currentPhotoString?.toUri()
+    val tempCameraUri = tempCameraUriString?.toUri() // Zamiana ze stringa na URI
+    val currentPhoto = currentPhotoString?.toUri() // Zamiana ze stringa na URI
 
-    val permissionLauncher = rememberLauncherForActivityResult( // Uprawnienia
+    val permissionLauncher = rememberLauncherForActivityResult( // Launcher do uprawnien
         contract = ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
         val granted = permissions.all { it.value }
-        if (!granted) {
+        if (granted) {
+            Toast.makeText(context, "Przyznano uprawnienia", Toast.LENGTH_SHORT).show()
+        } else {
             Toast.makeText(context, "Brak wymaganych uprawnień", Toast.LENGTH_SHORT).show()
         }
     }
 
-    val galleryLauncher = rememberLauncherForActivityResult( // Galeria
+    val galleryLauncher = rememberLauncherForActivityResult( // Uruchomienie galerii
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -103,7 +108,7 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
         }
     }
 
-    val cameraLauncher = rememberLauncherForActivityResult( // Aparat
+    val cameraLauncher = rememberLauncherForActivityResult( // Uruchomienie aparatu
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
         if (success && tempCameraUri != null) {
@@ -220,7 +225,7 @@ suspend fun odczytajExif(
             val hasLatLong = exif.getLatLong(latLong)
             inputStream.close()
 
-            fun geocodeCity(lat: Double, lon: Double): String? {
+            fun geocodeCity(lat: Double, lon: Double): String? { // Odczytanie nazwy miasta
                 return try {
                     val geocoder = Geocoder(context, Locale.getDefault())
                     val addresses = geocoder.getFromLocation(lat, lon, 1)

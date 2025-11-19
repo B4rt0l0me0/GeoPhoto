@@ -1,3 +1,4 @@
+// Łączenie UI z bazą danych
 package com.example.geophoto.ui
 
 import android.app.Application
