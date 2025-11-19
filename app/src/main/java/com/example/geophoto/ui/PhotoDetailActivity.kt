@@ -54,8 +54,8 @@ class PhotoDetailActivity : ComponentActivity() {
                     }
 
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("Lat: $latitude, Lon: $longitude", color = Color.Black) // Informacje o współrzędnych
-                    Text("Miasto: $cityName", color = Color.Black) // Informacje o zdjęciu
+                    Text("Lat: $latitude, Lon: $longitude") // Informacje o współrzędnych
+                    Text("Miasto: $cityName") // Informacje o zdjęciu
                 }
             }
         }

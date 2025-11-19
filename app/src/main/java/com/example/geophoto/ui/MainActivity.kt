@@ -47,7 +47,6 @@ import android.location.Location
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.foundation.verticalScroll
@@ -83,7 +82,7 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
     val currentPhoto = currentPhotoString?.toUri() // Zamiana ze stringa na URI
 
     val permissionLauncher = rememberLauncherForActivityResult( // Launcher do uprawnien
-        contract = ActivityResultContracts.RequestMultiplePermissions()
+        contract = ActivityResultContracts.RequestMultiplePermissions() // Prośba użytkownika o uprawnienia
     ) { permissions ->
         val granted = permissions.all { it.value }
         if (granted) {
@@ -100,7 +99,7 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
             result.data?.data?.let { uri ->
                 currentPhotoString = uri.toString()
                 coroutineScope.launch {
-                    val localPath = zapiszKopieZdjecia(context, uri)
+                    val localPath = zapiszKopieZdjecia(context, uri) // Ścieżka do zapisu zdjęcia
                     val localUri = Uri.fromFile(File(localPath))
                     exifText = odczytajExif(localUri, context, fusedLocationClient, photoViewModel)
                 }
@@ -119,7 +118,7 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
         }
     }
 
-    Scaffold { padding ->
+    Scaffold { padding -> // Wygląd aplikacji
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -143,7 +142,6 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
 
             Text( // Tekst pod zdjęciem na głownym ekranie
                 text = exifText,
-                color = Color.Black,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -157,12 +155,12 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
                         galleryLauncher.launch(intent)
                     }
                 ) {
-                    Text("Galeria", color = Color.White)
+                    Text("Galeria")
                 }
 
                 Button( // Przycisk do uruchomienia aparatu
                     onClick = {
-                        val hasPermissions = listOf(
+                        val hasPermissions = listOf( // Uprawnienia
                             Manifest.permission.CAMERA,
                             Manifest.permission.ACCESS_FINE_LOCATION
                         ).all {
@@ -180,7 +178,7 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
                         }
 
                         val photoFile = utworzPlik(context)
-                        val uri = FileProvider.getUriForFile(
+                        val uri = FileProvider.getUriForFile( // Adres URI
                             context, "${context.packageName}.fileprovider", photoFile
                         )
 
@@ -189,7 +187,7 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
 
                     }
                 ) {
-                    Text("Aparat", color = Color.White)
+                    Text("Aparat")
                 }
             }
 
@@ -198,14 +196,14 @@ fun GeoPhotoApp(photoViewModel: PhotoViewModel) {
             Button( // Przycisk do mapy zdjęć
                 onClick = { context.startActivity(Intent(context, MapActivity::class.java)) },
                 modifier = Modifier.fillMaxWidth(0.9f)
-            ) { Text("Mapa wszystkich zdjęć", color = Color.White) }
+            ) { Text("Mapa wszystkich zdjęć") }
 
             Spacer(modifier = Modifier.height(8.dp))
 
             Button( // Przycisk do listy zdjęć
                 onClick = { context.startActivity(Intent(context, PhotoListActivity::class.java)) },
                 modifier = Modifier.fillMaxWidth(0.9f)
-            ) { Text("Zdjęcia (lista)", color = Color.White) }
+            ) { Text("Zdjęcia (lista)") }
         }
     }
 }
@@ -221,27 +219,27 @@ suspend fun odczytajExif(
         val inputStream: InputStream? = context.contentResolver.openInputStream(uri)
         if (inputStream != null) {
             val exif = ExifInterface(inputStream)
-            val latLong = FloatArray(2)
-            val hasLatLong = exif.getLatLong(latLong)
+            val latLong = FloatArray(2) // Tablica na współrzędne
+            val hasLatLong = exif.getLatLong(latLong) // Współrzędne zdjęcia
             inputStream.close()
 
             fun geocodeCity(lat: Double, lon: Double): String? { // Odczytanie nazwy miasta
                 return try {
-                    val geocoder = Geocoder(context, Locale.getDefault())
-                    val addresses = geocoder.getFromLocation(lat, lon, 1)
-                    val addr = addresses?.firstOrNull()
-                    addr?.locality ?: addr?.subAdminArea ?: addr?.adminArea
+                    val geocoder = Geocoder(context, Locale.getDefault()) // Zamiana współrzędnych na adres
+                    val addresses = geocoder.getFromLocation(lat, lon, 1) // Pobranie adresu z lokalizacji
+                    val addr = addresses?.firstOrNull() // Pobranie pierwszego adresu z lokalizacji
+                    addr?.locality ?: addr?.subAdminArea ?: addr?.adminArea // Miasto -> Powiat -> Województwo
                 } catch (e: Exception) {
                     null
                 }
             }
 
-            if (hasLatLong) {
-                val lat = latLong[0].toDouble()
-                val lon = latLong[1].toDouble()
-                val cityName = geocodeCity(lat, lon)
+            if (hasLatLong) { // Sprawdzenie współrzędnych
+                val lat = latLong[0].toDouble() // Pobranie szerokości
+                val lon = latLong[1].toDouble() // Pobranie długości
+                val cityName = geocodeCity(lat, lon) // Pobranie nazwy miasta
 
-                viewModel.insertPhoto(
+                viewModel.insertPhoto( // Zapis do bazy danych
                     PhotoEntity(
                         filePath = uri.toString(),
                         latitude = lat,
@@ -253,7 +251,7 @@ suspend fun odczytajExif(
             } else {
                 val loc: Location? = try {
                     suspendCancellableCoroutine { cont ->
-                        fusedLocationClient.lastLocation
+                        fusedLocationClient.lastLocation // Pobranie ostatniej znanej lokalizacji
                             .addOnSuccessListener { location -> cont.resume(location) }
                             .addOnFailureListener { e -> cont.resumeWithException(e) }
                     }
@@ -261,10 +259,11 @@ suspend fun odczytajExif(
                     null
                 }
 
-                if (loc != null) {
-                    val lat = loc.latitude
-                    val lon = loc.longitude
-                    val cityName = geocodeCity(lat, lon)
+                if (loc != null) { // Sprawdzenie czy pobrało
+                    val lat = loc.latitude // Pobranie szerokości
+                    val lon = loc.longitude //Pobranie długości
+                    val cityName = geocodeCity(lat, lon)  // Pobranie nazwy miasta
+
 
                     viewModel.insertPhoto(
                         PhotoEntity(
@@ -276,28 +275,28 @@ suspend fun odczytajExif(
                     )
                     return "GPS: $lat, $lon\nMiasto: ${cityName ?: "Nieznane"}"
                 } else {
-                    return "Brak GPS — lokalizacja zostanie dodana"
+                    return ""
                 }
             }
         } else {
-            return "Błąd otwarcia zdjęcia"
-        }
+                return ""
+            }
     } catch (e: Exception) {
-        return "Błąd EXIF: ${e.message}"
+        return ""
     }
 }
 
 fun utworzPlik(context: Context): File {
-    val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date())
-    val storageDir = context.getExternalFilesDir(null)
+    val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(Date()) // Tworzenie znacznika czasu dla zdjęcia
+    val storageDir = context.getExternalFilesDir(null) // Folder główny aplikacji w pamięci zewnętrznej
     return File.createTempFile("GeoPhoto_${timeStamp}_", ".jpg", storageDir)
 }
 fun zapiszKopieZdjecia(context: Context, uri: Uri): String {
-    val inputStream = context.contentResolver.openInputStream(uri) ?: return ""
-    val dir = context.getExternalFilesDir("images")
+    val inputStream = context.contentResolver.openInputStream(uri) ?: return "" // Pobranie adresu URI zdjecia
+    val dir = context.getExternalFilesDir("images") // Lokalizacja katalogu images
     if (dir != null && !dir.exists()) dir.mkdirs()
-    val file = File(dir, "photo_${System.currentTimeMillis()}.jpg")
-    inputStream.use { input ->
+    val file = File(dir, "photo_${System.currentTimeMillis()}.jpg") // Tworzenie nowego pliku zdjecia
+    inputStream.use { input -> // Zapisanie pliku w folderze images
         file.outputStream().use { output ->
             input.copyTo(output)
         }
