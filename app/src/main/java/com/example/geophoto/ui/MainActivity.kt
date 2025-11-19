@@ -225,7 +225,7 @@ suspend fun odczytajExif(
 
             fun geocodeCity(lat: Double, lon: Double): String? { // Odczytanie nazwy miasta
                 return try {
-                    val geocoder = Geocoder(context, Locale.getDefault()) // Zamiana współrzędnych na adres
+                    val geocoder = Geocoder(context, Locale.getDefault()) // Zamiana miasta na współrzędne
                     val addresses = geocoder.getFromLocation(lat, lon, 1) // Pobranie adresu z lokalizacji
                     val addr = addresses?.firstOrNull() // Pobranie pierwszego adresu z lokalizacji
                     addr?.locality ?: addr?.subAdminArea ?: addr?.adminArea // Miasto -> Powiat -> Województwo
